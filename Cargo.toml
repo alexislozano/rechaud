@@ -1,0 +1,10 @@
+[package]
+name = "rechaud"
+version = "0.1.0"
+authors = ["Alexis Lozano <alexis.pascal.lozano@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+clap = "2.33"
+walkdir = "2"
+dialoguer = { git = "https://github.com/alexislozano/dialoguer" }
