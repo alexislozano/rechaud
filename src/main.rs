@@ -29,8 +29,6 @@ fn main() {
 }
 
 fn process_path(root_path: String) {
-    println!("Processing {}", &root_path);
-
     let show_names = folder_names(&root_path);
 
     for show_name in show_names {
@@ -146,7 +144,7 @@ fn contains_files(path: &str) -> bool {
 
 fn folder_names(path: &str) -> Vec<String> {
     match read_dir(path) {
-        Err(_) => panic!("Cannot read the root directory"),
+        Err(_) => panic!("Cannot read the directory"),
         Ok(items) => {
             let mut new_items = items
                 .map(|item| {
