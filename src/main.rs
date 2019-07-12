@@ -63,15 +63,13 @@ fn process_path(root_path: String) {
             };
         }
 
+        let width_season = season_names.len() / 10 + 1;
+
         for i in 0..season_names.len() {
             let index_s = i + 1;
 
             let old_season_name = &season_names[order_seasons[i]];
-            let new_season_name = if index_s < 10 {
-                format!("S0{}", index_s)
-            } else {
-                format!("S{}", index_s)
-            };
+            let new_season_name = format!("S{:0width$}", index_s, width = width_season);
 
             match rename(
                 format!("{}/{}_tmp", &show_path, old_season_name),
@@ -107,17 +105,21 @@ fn process_path(root_path: String) {
                 };
             }
 
+            let width_episode = episode_names.len() / 10 + 1;
+
             for j in 0..episode_names.len() {
                 let index_e = j + 1;
 
                 let old_episode_name = &episode_names[order_episodes[j]];
                 let old_episode_name_split: Vec<_> = old_episode_name.split(".").collect();
                 let extension = old_episode_name_split[old_episode_name_split.len() - 1];
-                let new_episode_name = if index_e < 10 {
-                    format!("{}E0{}.{}", &new_season_name, index_e, extension)
-                } else {
-                    format!("{}E{}.{}", &new_season_name, index_e, extension)
-                };
+                let new_episode_name = format!(
+                    "{}E{:0width$}.{}",
+                    &new_season_name,
+                    index_e,
+                    extension,
+                    width = width_episode
+                );
 
                 match rename(
                     format!("{}/{}_tmp", &season_path, old_episode_name),
