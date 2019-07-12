@@ -1,12 +1,7 @@
-#[macro_use]
-extern crate clap;
-use clap::{App, Arg};
-
+use clap::{crate_authors, crate_name, crate_version, App, Arg};
+use dialoguer::{theme::ColorfulTheme, OrderList};
 use std::fs::read_dir;
 use std::fs::rename;
-
-extern crate dialoguer;
-use dialoguer::{theme::ColorfulTheme, OrderList};
 
 fn main() {
     let matches = App::new(crate_name!())
@@ -52,8 +47,8 @@ fn process_path(root_path: String) {
             vec![0]
         };
 
-        for i in 0..season_names.len() {
-            let old_season_name = &season_names[order_seasons[i]];
+        for (_, order_season) in order_seasons.iter().enumerate() {
+            let old_season_name = &season_names[*order_season];
             match rename(
                 format!("{}/{}", &show_path, old_season_name),
                 format!("{}/{}_tmp", &show_path, old_season_name),
@@ -63,12 +58,12 @@ fn process_path(root_path: String) {
             };
         }
 
-        let width_season = season_names.len() / 10 + 1;
+        let width_season = order_seasons.len() / 10 + 1;
 
-        for i in 0..season_names.len() {
+        for (i, order_season) in order_seasons.iter().enumerate() {
             let index_s = i + 1;
 
-            let old_season_name = &season_names[order_seasons[i]];
+            let old_season_name = &season_names[*order_season];
             let new_season_name = format!("S{:0width$}", index_s, width = width_season);
 
             match rename(
@@ -94,8 +89,8 @@ fn process_path(root_path: String) {
                 vec![0]
             };
 
-            for j in 0..episode_names.len() {
-                let old_episode_name = &episode_names[order_episodes[j]];
+            for (_, order_episode) in order_episodes.iter().enumerate() {
+                let old_episode_name = &episode_names[*order_episode];
                 match rename(
                     format!("{}/{}", &season_path, old_episode_name),
                     format!("{}/{}_tmp", &season_path, old_episode_name),
@@ -105,12 +100,12 @@ fn process_path(root_path: String) {
                 };
             }
 
-            let width_episode = episode_names.len() / 10 + 1;
+            let width_episode = order_episodes.len() / 10 + 1;
 
-            for j in 0..episode_names.len() {
+            for (j, order_episode) in order_episodes.iter().enumerate() {
                 let index_e = j + 1;
 
-                let old_episode_name = &episode_names[order_episodes[j]];
+                let old_episode_name = &episode_names[*order_episode];
                 let old_episode_name_split: Vec<_> = old_episode_name.split(".").collect();
                 let extension = old_episode_name_split[old_episode_name_split.len() - 1];
                 let new_episode_name = format!(
