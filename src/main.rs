@@ -132,14 +132,10 @@ fn process_path(root_path: String) {
 }
 
 fn contains_files(path: &str) -> bool {
-    let items = match read_dir(path) {
+    match read_dir(path) {
         Err(_) => panic!("Cannot read the directory"),
-        Ok(items) => items,
-    };
-
-    items
-        .map(|item| item.unwrap().path().is_file())
-        .fold(false, |a, b| a || b)
+        Ok(mut items) => items.any(|item| item.unwrap().path().is_file()),
+    }
 }
 
 fn folder_names(path: &str) -> Vec<String> {
