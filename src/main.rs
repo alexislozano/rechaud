@@ -47,7 +47,7 @@ fn process_path(root_path: String) {
             vec![0]
         };
 
-        for (_, order_season) in order_seasons.iter().enumerate() {
+        for order_season in order_seasons.iter() {
             let old_season_name = &season_names[*order_season];
             match rename(
                 format!("{}/{}", &show_path, old_season_name),
@@ -89,7 +89,7 @@ fn process_path(root_path: String) {
                 vec![0]
             };
 
-            for (_, order_episode) in order_episodes.iter().enumerate() {
+            for order_episode in order_episodes.iter() {
                 let old_episode_name = &episode_names[*order_episode];
                 match rename(
                     format!("{}/{}", &season_path, old_episode_name),
