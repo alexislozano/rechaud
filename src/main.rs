@@ -24,22 +24,18 @@ fn main() {
 }
 
 fn process_path(root_path: String) {
-    let show_names = folder_names(&root_path);
+    let show_names = get_names(&root_path, false);
 
     for show_name in show_names {
         let show_path = format!("{}/{}", &root_path, &show_name);
         println!("Processing the show: {}", &show_name);
 
-        if contains_files(&show_path) {
-            println!("Aborting. Add season folders please.");
-            continue;
-        }
-
-        let season_names = folder_names(&show_path);
+        let season_names = get_names(&show_path, false);
 
         let order_seasons = if season_names.len() > 1 {
             OrderList::with_theme(&ColorfulTheme::default())
                 .with_prompt("Please order the seasons")
+                .paged(true)
                 .items(&season_names)
                 .interact()
                 .unwrap()
@@ -77,11 +73,12 @@ fn process_path(root_path: String) {
             println!("Processing the season: {}", &new_season_name);
 
             let season_path = format!("{}/{}", &show_path, &new_season_name);
-            let episode_names = folder_names(&season_path);
+            let episode_names = get_names(&season_path, true);
 
             let order_episodes = if episode_names.len() > 1 {
                 OrderList::with_theme(&ColorfulTheme::default())
                     .with_prompt("Please order the episodes")
+                    .paged(true)
                     .items(&episode_names)
                     .interact()
                     .unwrap()
@@ -128,27 +125,20 @@ fn process_path(root_path: String) {
     }
 }
 
-fn contains_files(path: &str) -> bool {
-    match read_dir(path) {
-        Err(_) => panic!("Cannot read the directory"),
-        Ok(mut items) => items.any(|item| item.unwrap().path().is_file()),
-    }
-}
-
-fn folder_names(path: &str) -> Vec<String> {
+fn get_names(path: &str, files_only: bool) -> Vec<String> {
     match read_dir(path) {
         Err(_) => panic!("Cannot read the directory"),
         Ok(items) => {
             let mut new_items = items
-                .map(|item| {
-                    item.unwrap()
-                        .path()
-                        .file_name()
-                        .unwrap()
-                        .to_str()
-                        .unwrap()
-                        .to_string()
-                })
+                .map(|item| item.unwrap().path())
+                .filter(|path| !(files_only ^ path.is_file()))
+                .map(|path| path
+                    .file_name()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .to_string()
+                )
                 .collect::<Vec<String>>();
             new_items.sort();
             new_items
