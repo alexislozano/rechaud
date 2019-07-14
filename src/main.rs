@@ -54,7 +54,7 @@ fn process_path(root_path: String) {
             };
         }
 
-        let width_season = order_seasons.len() / 10 + 1;
+        let width_season = format!("{}", order_seasons.len()).len();
 
         for (i, order_season) in order_seasons.iter().enumerate() {
             let index_s = i + 1;
@@ -97,7 +97,7 @@ fn process_path(root_path: String) {
                 };
             }
 
-            let width_episode = order_episodes.len() / 10 + 1;
+            let width_episode = format!("{}", order_episodes.len()).len();
 
             for (j, order_episode) in order_episodes.iter().enumerate() {
                 let index_e = j + 1;
