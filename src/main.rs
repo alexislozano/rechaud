@@ -1,7 +1,6 @@
 use clap::{crate_authors, crate_name, crate_version, App, Arg};
 use dialoguer::{theme::ColorfulTheme, OrderList};
-use std::fs::read_dir;
-use std::fs::rename;
+use std::fs::{read_dir, rename};
 
 fn main() {
     let matches = App::new(crate_name!())
@@ -24,12 +23,12 @@ fn main() {
 }
 
 fn process_path(root_path: String) {
+    println!("Processing the folder: {}", &root_path);
     let show_names = get_names(&root_path, false);
 
     for show_name in show_names {
-        let show_path = format!("{}/{}", &root_path, &show_name);
         println!("Processing the show: {}", &show_name);
-
+        let show_path = format!("{}/{}", &root_path, &show_name);
         let season_names = get_names(&show_path, false);
 
         let order_seasons = if season_names.len() > 1 {
@@ -43,20 +42,29 @@ fn process_path(root_path: String) {
             vec![0]
         };
 
-        for order_season in order_seasons.iter() {
+        let mut error_seasons: Vec<bool> = (0..order_seasons.len()).map(|_| false).collect();
+
+        for (i, order_season) in order_seasons.iter().enumerate() {
             let old_season_name = &season_names[*order_season];
             match rename(
                 format!("{}/{}", &show_path, old_season_name),
                 format!("{}/{}_tmp", &show_path, old_season_name),
             ) {
-                Err(_) => panic!("Cannot rename the folder"),
-                _ => (),
+                Err(_) => {
+                    eprintln!("Could not rename the folder");
+                    error_seasons[i] = true;
+                }
+                Ok(_) => (),
             };
         }
 
         let width_season = format!("{}", order_seasons.len()).len();
 
         for (i, order_season) in order_seasons.iter().enumerate() {
+            if error_seasons[i] {
+                continue;
+            }
+
             let index_s = i + 1;
 
             let old_season_name = &season_names[*order_season];
@@ -66,12 +74,18 @@ fn process_path(root_path: String) {
                 format!("{}/{}_tmp", &show_path, old_season_name),
                 format!("{}/{}", &show_path, new_season_name),
             ) {
-                Err(_) => panic!("Cannot rename the folder"),
-                _ => (),
+                Err(_) => {
+                    eprintln!("Could not rename the folder");
+                    error_seasons[i] = true;
+                }
+                Ok(_) => (),
             };
 
-            println!("Processing the season: {}", &new_season_name);
+            if error_seasons[i] {
+                continue;
+            }
 
+            println!("Processing the season: {}", &new_season_name);
             let season_path = format!("{}/{}", &show_path, &new_season_name);
             let episode_names = get_names(&season_path, true);
 
@@ -86,20 +100,29 @@ fn process_path(root_path: String) {
                 vec![0]
             };
 
-            for order_episode in order_episodes.iter() {
+            let mut error_episodes: Vec<bool> = (0..order_episodes.len()).map(|_| false).collect();
+
+            for (j, order_episode) in order_episodes.iter().enumerate() {
                 let old_episode_name = &episode_names[*order_episode];
                 match rename(
                     format!("{}/{}", &season_path, old_episode_name),
                     format!("{}/{}_tmp", &season_path, old_episode_name),
                 ) {
-                    Err(_) => panic!("Cannot rename the folder"),
-                    _ => (),
+                    Err(_) => {
+                        eprintln!("Could not rename the folder");
+                        error_episodes[j] = true;
+                    }
+                    Ok(_) => (),
                 };
             }
 
             let width_episode = format!("{}", order_episodes.len()).len();
 
             for (j, order_episode) in order_episodes.iter().enumerate() {
+                if error_episodes[j] {
+                    continue;
+                }
+
                 let index_e = j + 1;
 
                 let old_episode_name = &episode_names[*order_episode];
@@ -117,8 +140,8 @@ fn process_path(root_path: String) {
                     format!("{}/{}_tmp", &season_path, old_episode_name),
                     format!("{}/{}", &season_path, new_episode_name),
                 ) {
-                    Err(_) => panic!("Cannot rename the folder"),
-                    _ => (),
+                    Err(_) => eprintln!("Could not rename the folder"),
+                    Ok(_) => (),
                 };
             }
         }
@@ -127,18 +150,15 @@ fn process_path(root_path: String) {
 
 fn get_names(path: &str, files_only: bool) -> Vec<String> {
     match read_dir(path) {
-        Err(_) => panic!("Cannot read the directory"),
+        Err(_) => {
+            eprintln!("Could not process the folder");
+            vec![]
+        }
         Ok(items) => {
             let mut new_items = items
                 .map(|item| item.unwrap().path())
                 .filter(|path| !(files_only ^ path.is_file()))
-                .map(|path| path
-                    .file_name()
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .to_string()
-                )
+                .map(|path| path.file_name().unwrap().to_str().unwrap().to_string())
                 .collect::<Vec<String>>();
             new_items.sort();
             new_items
