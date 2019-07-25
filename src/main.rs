@@ -80,15 +80,14 @@ fn process_show(path: &str) {
 
     for (i, order_season) in order_seasons.iter().enumerate() {
         let old_season_name = &season_names[*order_season];
-        match rename(
+        if rename(
             format!("{}/{}", path, old_season_name),
             format!("{}/{}_tmp", path, old_season_name),
-        ) {
-            Err(_) => {
-                eprintln!("Could not rename the folder");
-                error_seasons[i] = true;
-            }
-            Ok(_) => (),
+        )
+        .is_err()
+        {
+            eprintln!("Could not rename the folder");
+            error_seasons[i] = true;
         };
     }
 
@@ -104,15 +103,14 @@ fn process_show(path: &str) {
         let old_season_name = &season_names[*order_season];
         let season_name = format!("S{:0width$}", index_s, width = width_season);
 
-        match rename(
+        if rename(
             format!("{}/{}_tmp", path, old_season_name),
             format!("{}/{}", path, season_name),
-        ) {
-            Err(_) => {
-                eprintln!("Could not rename the folder");
-                error_seasons[i] = true;
-            }
-            Ok(_) => (),
+        )
+        .is_err()
+        {
+            eprintln!("Could not rename the folder");
+            error_seasons[i] = true;
         };
 
         if error_seasons[i] {
@@ -143,15 +141,14 @@ fn process_season(path: &str, season_name: &str) {
 
     for (j, order_episode) in order_episodes.iter().enumerate() {
         let old_episode_name = &episode_names[*order_episode];
-        match rename(
+        if rename(
             format!("{}/{}", path, old_episode_name),
             format!("{}/{}_tmp", path, old_episode_name),
-        ) {
-            Err(_) => {
-                eprintln!("Could not rename the folder");
-                error_episodes[j] = true;
-            }
-            Ok(_) => (),
+        )
+        .is_err()
+        {
+            eprintln!("Could not rename the folder");
+            error_episodes[j] = true;
         };
     }
 
@@ -165,7 +162,7 @@ fn process_season(path: &str, season_name: &str) {
         let index_e = j + 1;
 
         let old_episode_name = &episode_names[*order_episode];
-        let old_episode_name_split: Vec<_> = old_episode_name.split(".").collect();
+        let old_episode_name_split: Vec<_> = old_episode_name.split('.').collect();
         let extension = old_episode_name_split[old_episode_name_split.len() - 1];
         let episode_name = format!(
             "{}E{:0width$}.{}",
@@ -175,12 +172,13 @@ fn process_season(path: &str, season_name: &str) {
             width = width_episode
         );
 
-        match rename(
+        if rename(
             format!("{}/{}_tmp", path, old_episode_name),
             format!("{}/{}", path, episode_name),
-        ) {
-            Err(_) => eprintln!("Could not rename the folder"),
-            Ok(_) => (),
+        )
+        .is_err()
+        {
+            eprintln!("Could not rename the folder");
         };
     }
 }
