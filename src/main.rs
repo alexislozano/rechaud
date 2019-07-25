@@ -65,15 +65,15 @@ fn process_show(path: &str) {
     println!("Processing the show: {}", path);
     let season_names = get_names(path, false);
 
-    let order_seasons = if season_names.len() > 1 {
-        OrderList::with_theme(&ColorfulTheme::default())
+    let order_seasons = match season_names.len() {
+        0 => vec![],
+        1 => vec![0],
+        _ => OrderList::with_theme(&ColorfulTheme::default())
             .with_prompt("Please order the seasons")
             .paged(true)
             .items(&season_names)
             .interact()
-            .unwrap()
-    } else {
-        vec![0]
+            .unwrap(),
     };
 
     let mut error_seasons: Vec<bool> = (0..order_seasons.len()).map(|_| false).collect();
@@ -126,15 +126,15 @@ fn process_season(path: &str, season_name: &str) {
     println!("Processing the season: {}", path);
     let episode_names = get_names(path, true);
 
-    let order_episodes = if episode_names.len() > 1 {
-        OrderList::with_theme(&ColorfulTheme::default())
+    let order_episodes = match episode_names.len() {
+        0 => vec![],
+        1 => vec![0],
+        _ => OrderList::with_theme(&ColorfulTheme::default())
             .with_prompt("Please order the episodes")
             .paged(true)
             .items(&episode_names)
             .interact()
-            .unwrap()
-    } else {
-        vec![0]
+            .unwrap(),
     };
 
     let mut error_episodes: Vec<bool> = (0..order_episodes.len()).map(|_| false).collect();
